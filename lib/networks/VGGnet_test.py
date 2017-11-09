@@ -1,5 +1,6 @@
+# -*- coding:utf-8 -*-
 import tensorflow as tf
-from networks.network import Network
+from .network import Network
 
 n_classes = 21
 _feat_stride = [16,]

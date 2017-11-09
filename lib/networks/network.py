@@ -1,11 +1,13 @@
+# -*- coding:utf-8 -*-
 import numpy as np
 import tensorflow as tf
-import roi_pooling_layer.roi_pooling_op as roi_pool_op
-import roi_pooling_layer.roi_pooling_op_grad
+
 from rpn_msr.proposal_layer_tf import proposal_layer as proposal_layer_py
 from rpn_msr.anchor_target_layer_tf import anchor_target_layer as anchor_target_layer_py
 from rpn_msr.proposal_target_layer_tf import proposal_target_layer as proposal_target_layer_py
 
+from roi_pooling_layer import roi_pooling_op as roi_pool_op
+from roi_pooling_layer import roi_pooling_op_grad
 
 
 DEFAULT_PADDING = 'SAME'
@@ -52,9 +54,9 @@ class Network(object):
                         try:
                             var = tf.get_variable(subkey)
                             session.run(var.assign(data_dict[key][subkey]))
-                            print "assign pretrain model "+subkey+ " to "+key
+                            print("assign pretrain model "+subkey+ " to "+key)
                         except ValueError:
-                            print "ignore "+key
+                            print("ignore "+key)
                             if not ignore_missing:
 
                                 raise
@@ -63,12 +65,12 @@ class Network(object):
         assert len(args)!=0
         self.inputs = []
         for layer in args:
-            if isinstance(layer, basestring):
+            if isinstance(layer, str):
                 try:
                     layer = self.layers[layer]
-                    print layer
+                    print(layer)
                 except KeyError:
-                    print self.layers.keys()
+                    print(list(self.layers.keys()))
                     raise KeyError('Unknown layer name fed: %s'%layer)
             self.inputs.append(layer)
         return self
@@ -77,12 +79,12 @@ class Network(object):
         try:
             layer = self.layers[layer]
         except KeyError:
-            print self.layers.keys()
+            print(list(self.layers.keys()))
             raise KeyError('Unknown layer name fed: %s'%layer)
         return layer
 
     def get_unique_name(self, prefix):
-        id = sum(t.startswith(prefix) for t,_ in self.layers.items())+1
+        id = sum(t.startswith(prefix) for t,_ in list(self.layers.items()))+1
         return '%s_%d'%(prefix, id)
 
     def make_var(self, name, shape, initializer=None, trainable=True):
@@ -94,7 +96,7 @@ class Network(object):
     @layer
     def conv(self, input, k_h, k_w, c_o, s_h, s_w, name, relu=True, padding=DEFAULT_PADDING, group=1, trainable=True):
         self.validate_padding(padding)
-        c_i = input.get_shape()[-1]
+        c_i = input.get_shape().as_list()[-1]
         assert c_i%group==0
         assert c_o%group==0
         convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
@@ -148,7 +150,7 @@ class Network(object):
         if isinstance(input[1], tuple):
             input[1] = input[1][0]
 
-        print input
+        print(input)
         return roi_pool_op.roi_pool(input[0], input[1],
                                     pooled_height,
                                     pooled_width,

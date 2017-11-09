@@ -9,8 +9,9 @@
 
 __sets = {}
 
-import networks.VGGnet_train
-import networks.VGGnet_test
+from .VGGnet_train import VGGnet_train
+from .VGGnet_test import VGGnet_test
+
 import pdb
 import tensorflow as tf
 
@@ -25,13 +26,13 @@ def get_network(name):
     #    raise KeyError('Unknown dataset: {}'.format(name))
     #return __sets[name]
     if name.split('_')[1] == 'test':
-       return networks.VGGnet_test()
+       return VGGnet_test()
     elif name.split('_')[1] == 'train':
-       return networks.VGGnet_train()
+       return VGGnet_train()
     else:
        raise KeyError('Unknown dataset: {}'.format(name))
     
 
 def list_networks():
     """List all registered imdbs."""
-    return __sets.keys()
+    return list(__sets.keys())
